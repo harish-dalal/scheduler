@@ -1,6 +1,5 @@
 import axios from "axios";
-
-const API_URL = "http://localhost:3001/api/auth";
+import { API_URL } from "./tasks";
 
 export const signin = (username) => {
   return axios.post(`${API_URL}/signin`, { username });
