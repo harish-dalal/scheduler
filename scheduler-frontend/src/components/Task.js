@@ -5,12 +5,40 @@ import { Checkbox, LABEL_PLACEMENT } from "baseui/checkbox";
 import { updateTaskStatus } from "../services/tasks";
 import { Button, SHAPE, SIZE, KIND } from "baseui/button";
 import { Delete } from "baseui/icon";
+import { SelectedDaysDisplay } from "./AddTask";
+
+function formatTime(date) {
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  let ampm = hours >= 12 ? "PM" : "AM";
+
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  minutes = minutes < 10 ? "0" + minutes : minutes;
+
+  let strTime = hours + ":" + minutes + " " + ampm;
+  return strTime;
+}
+
+function formatDate(date) {
+  const options = { year: "numeric", month: "long", day: "numeric" };
+  return date.toLocaleDateString(undefined, options);
+}
 
 const TaskBody = ({ task }) => {
-  console.log(task);
   return (
     <Block>
       <Block>{task?.description}</Block>
+      {task?.reminderTime && (
+        <Block>
+          <Block>{formatTime(new Date(task.reminderTime))}</Block>
+          {task?.recurring ? (
+            <SelectedDaysDisplay task={task} />
+          ) : (
+            <Block>{formatDate(new Date(task.reminderTime))}</Block>
+          )}
+        </Block>
+      )}
     </Block>
   );
 };
@@ -47,9 +75,16 @@ const Task = (props) => {
   );
 
   const handleOncomplete = async (value) => {
-    const response = await updateTaskStatus(task._id, value);
-    if (response.status === 200) {
-      setIsComplete(value);
+    try {
+      const response = await updateTaskStatus(task._id, value);
+      if (response.status === 200) {
+        setIsComplete(value);
+      } else {
+        alert("Failed to update task status.");
+      }
+    } catch (error) {
+      console.error("Error updating task:", error);
+      alert(`An error occurred while updating the task ${task._id}`);
     }
   };
 

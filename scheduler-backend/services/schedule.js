@@ -45,15 +45,11 @@ schedule.createSchedule = async function (task) {
       });
       await newTask.save();
 
-      console.log("task reminder " + newTask);
-
       scheduleLib.scheduleJob(newTask._id.toString(), date, async () => {
         const schedule = await ScheduledNotification.findById(newTask._id);
-        console.log("Task is due " + schedule);
 
         // Notification logic if the status is incomplete
         if (schedule.status === STATUS.incomplete) {
-          console.log("send socket notification");
           io.to(schedule.user.toString()).emit("reminder", task);
         }
 
@@ -61,7 +57,7 @@ schedule.createSchedule = async function (task) {
           await createNextTaskInstance(getNextDueDate(schedule), schedule);
       });
 
-      return task;
+      return newTask;
     };
 
     if (!task?.recurring) {

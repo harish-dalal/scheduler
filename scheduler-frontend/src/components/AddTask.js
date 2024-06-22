@@ -37,7 +37,7 @@ const CustomDatePicker = ({ label, value, onChange }) => {
   );
 };
 
-const daysOfWeek = [
+export const daysOfWeek = [
   { label: "S", value: 0 },
   { label: "M", value: 1 },
   { label: "T", value: 2 },
@@ -47,6 +47,49 @@ const daysOfWeek = [
   { label: "S", value: 6 },
 ];
 
+export const SelectedDaysDisplay = ({ task }) => {
+  return (
+    <ButtonGroup
+      mode="checkbox"
+      selected={task.recurrencePattern}
+      overrides={{
+        Root: {
+          style: {
+            marginTop: "10px",
+            display: "flex",
+          },
+        },
+      }}>
+      {daysOfWeek.map((day) => (
+        <Button
+          key={day.value}
+          disabled
+          overrides={{
+            BaseButton: {
+              style: ({ $theme }) => ({
+                borderRadius: "50%",
+                marginRight: $theme.sizing.scale200,
+                width: "20px",
+                height: "20px",
+                padding: 0,
+                fontSize: ".8em",
+                backgroundColor: task.days?.includes(day.value)
+                  ? $theme.colors.accent
+                  : $theme.colors.backgroundTertiary,
+                color: task.days?.includes(day.value)
+                  ? $theme.colors.buttonPrimaryText
+                  : $theme.colors.contentPrimary,
+                cursor: "default",
+              }),
+            },
+          }}>
+          {day.label}
+        </Button>
+      ))}
+    </ButtonGroup>
+  );
+};
+
 const DayToggle = ({ task, setTask }) => {
   const handleDayChange = (value) => {
     setTask((task) => {
@@ -54,7 +97,10 @@ const DayToggle = ({ task, setTask }) => {
       days = days.includes(value)
         ? days.filter((day) => day !== value)
         : [...days, value];
-      return { ...task, ...{ date: new Date(), days } };
+      return {
+        ...task,
+        ...{ date: days.length === 0 ? new Date() : "", days },
+      };
     });
   };
 
@@ -133,8 +179,6 @@ const AddTask = ({ setAllTask }) => {
       recurrencePattern: isAlert ? task.days : [],
     };
 
-    console.log(taskPayload);
-
     const errorMessage = validateTask(taskPayload);
     if (errorMessage) {
       alert(errorMessage);
@@ -145,7 +189,6 @@ const AddTask = ({ setAllTask }) => {
       const response = await createTask(taskPayload);
       if (response.status === 200 && response.data.success) {
         setAllTask((tasks) => [...tasks, response.data.data]);
-        // setTask(defaultTask);
       } else {
         alert("Failed to create task.");
       }
@@ -209,7 +252,15 @@ const AddTask = ({ setAllTask }) => {
             onChange={({ date }) =>
               setTask((task) => ({
                 ...task,
-                ...{ date: new Date(date), days: [] },
+                ...{
+                  date:
+                    date || task.days.length === 0
+                      ? date
+                        ? new Date(date)
+                        : new Date()
+                      : "",
+                  days: [],
+                },
               }))
             }
           />

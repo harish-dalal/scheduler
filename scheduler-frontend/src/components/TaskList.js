@@ -1,34 +1,35 @@
 import React, { useState, useEffect, useContext } from "react";
-import { createTask, getTasks, deleteTask, getUser } from "../services/tasks";
-import { Button } from "baseui/button";
+import { getTasks, deleteTask, getUser } from "../services/tasks";
+import { Button, KIND } from "baseui/button";
 import { SIZE } from "baseui/input";
 import SocketContext from "../services/socket";
 import { Block } from "baseui/block";
 import { Accordion, Panel } from "baseui/accordion";
 import Task from "./Task";
 import AddTask from "./AddTask";
-import { useStyletron } from "baseui";
+import ReloadIcon from "../utils/ReloadIcon";
 
 const TaskList = ({ onLogout }) => {
-  const [css, theme] = useStyletron();
   const [tasks, setTasks] = useState([]);
 
   const socket = useContext(SocketContext);
 
-  useEffect(() => {
-    async function fetchTasks() {
-      let response = await getTasks();
-      if (response.status === 200) {
-        setTasks(response.data.data.schedules);
-      }
+  async function fetchTasks() {
+    let response = await getTasks();
+    if (response.status === 200) {
+      setTasks(response.data.data.schedules);
     }
+  }
+
+  useEffect(() => {
     fetchTasks();
   }, []);
 
   useEffect(() => {
-    socket.emit("authenticate", getUser());
+    socket.emit("authenticate", getUser().userid);
     socket.on("reminder", (task) => {
-      alert(`Reminder: ${task.title} is due!`);
+      alert(`Reminder\n${task.title}\n${task.description}`);
+      fetchTasks();
     });
 
     return () => {
@@ -43,9 +44,21 @@ const TaskList = ({ onLogout }) => {
 
   return (
     <Block display={"flex"} flexDirection="column">
-      <Block display="flex" justifyContent="end" marginBottom={"100px"}>
-        <Button size={SIZE.mini} onClick={onLogout}>
-          {`Log out ${getUser()}`}
+      <Block
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        marginBottom={"50px"}>
+        <Block display="flex" flexDirection="column" justifyContent="end">
+          {`Welcom ${getUser().username}`}
+          <Button size={SIZE.mini} onClick={onLogout}>
+            {`Log out ${getUser().userid}`}
+          </Button>
+        </Block>
+      </Block>
+      <Block display="flex" justifyContent="end">
+        <Button onClick={fetchTasks} kind={KIND.tertiary} size={SIZE.mini}>
+          Reload <ReloadIcon />
         </Button>
       </Block>
       <Accordion>
@@ -53,7 +66,7 @@ const TaskList = ({ onLogout }) => {
           <AddTask setAllTask={setTasks} />
         </Panel>
       </Accordion>
-      <Accordion onChange={({ expanded }) => console.log(expanded)} accordion>
+      <Accordion>
         {tasks &&
           tasks?.map((task) => (
             <Task

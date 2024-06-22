@@ -48,8 +48,6 @@ router.post("/task", authMiddleware, async function (req, res) {
       user: userId,
     };
 
-    console.log(payload);
-
     let task = new ScheduledNotification(payload);
     if (!task.reminderTime) await task.save();
     else task = await schedule.createSchedule(task);
@@ -66,8 +64,6 @@ router.post("/task", authMiddleware, async function (req, res) {
 
 router.get("/task", authMiddleware, async function (req, res) {
   try {
-    console.log(req.userId);
-
     let schedules = await ScheduledNotification.find({ user: req.userId });
 
     res.json({

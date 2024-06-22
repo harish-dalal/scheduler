@@ -7,6 +7,7 @@ import { Provider as StyletronProvider } from "styletron-react";
 import { LightTheme, BaseProvider, styled } from "baseui";
 import { Block } from "baseui/block";
 import Login from "./components/Login";
+import { HeadingLarge } from "baseui/typography";
 
 const engine = new Styletron();
 
@@ -23,13 +24,15 @@ function App() {
     !!localStorage.getItem("userid")
   );
 
-  const handleLogin = (username) => {
-    localStorage.setItem("userid", username); // Replace 'your_user_id' with actual user ID or username
+  const handleLogin = (userid, username = "user") => {
+    localStorage.setItem("userid", userid);
+    localStorage.setItem("username", username);
     setIsLoggedIn(true);
   };
 
   const handleLogout = () => {
     localStorage.removeItem("userid");
+    localStorage.removeItem("username");
     setIsLoggedIn(false);
   };
 
@@ -38,6 +41,7 @@ function App() {
       <BaseProvider theme={LightTheme}>
         <Centered>
           <Block width="100%" maxWidth="500px">
+            <HeadingLarge>Scheduler</HeadingLarge>
             {isLoggedIn ? (
               <SocketContext.Provider value={SocketContext._currentValue}>
                 <TaskList onLogout={handleLogout} />

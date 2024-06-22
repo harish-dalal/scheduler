@@ -13,7 +13,13 @@ const Login = ({ onLogin }) => {
     if (!username) return;
     const response = await signin(username);
     if (response.status === 200) {
-      onLogin(response.data.userId);
+      onLogin(response.data.userId, username);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSubmit();
     }
   };
 
@@ -23,6 +29,7 @@ const Login = ({ onLogin }) => {
         value={username}
         size={SIZE.mini}
         onChange={(e) => setUsername(e.target.value)}
+        onKeyDown={handleKeyDown}
       />
       <Button
         overrides={{

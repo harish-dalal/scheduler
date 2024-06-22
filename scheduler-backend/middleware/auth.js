@@ -3,7 +3,6 @@ const User = require("../models/user");
 const authMiddleware = async (req, res, next) => {
   const userId = req.header("x-user-id");
   if (!userId) {
-    console.log(userId);
     return res.status(401).json({ error: "User ID not provided" });
   }
 

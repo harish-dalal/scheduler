@@ -3,17 +3,19 @@ import axios from "axios";
 export const API_URL = "http://localhost:5000/api";
 
 export const getUser = () => {
-  return localStorage.getItem("userid");
+  return {
+    userid: localStorage.getItem("userid"),
+    username: localStorage.getItem("username"),
+  };
 };
 
 const getHeaders = () => {
   return {
-    headers: { "x-user-id": getUser() },
+    headers: { "x-user-id": getUser().userid },
   };
 };
 
 export const createTask = (task) => {
-  console.log(getHeaders());
   return axios.post(`${API_URL}/task`, task, getHeaders());
 };
 

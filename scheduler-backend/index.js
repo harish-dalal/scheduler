@@ -25,7 +25,6 @@ schedule.setIo(io);
 io.on("connection", (socket) => {
   console.log("New client connected");
   socket.on("authenticate", (userId) => {
-    // console.log(userId);
     socket.join(userId);
   });
   socket.on("disconnect", () => {
